@@ -77,7 +77,10 @@ function addQuakeMarkers(quakes, map) {
 
 function registerInfoWindow(map, marker, infoWindow) {
 	google.maps.event.addListener(marker, 'click', function(){
-
+		if(gov.usgs.iw) {
+			gov.usgs.iw.close();
+		}
+		gov.usgs.iw = infoWindow;
 		infoWindow.open(map, marker);
 
 	});
