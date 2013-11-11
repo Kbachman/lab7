@@ -30,3 +30,56 @@ $(document).ajaxError(function(event, jqXHR, err){
     alert('Problem obtaining data: ' + jqXHR.statusText);
 });
 
+$(function(){
+	// document is ready for manipulation
+	getQuakes();
+
+});
+
+function getQuakes() {
+	$.getJSON(gov.usgs.quakesUrl, function(quakes){
+		gov.usgs.quakes = quakes;
+		$('.message').html('Displaying ' + quakes.length + ' earthquakes');
+
+		gov.usgs.quakesMap = new google.maps.Map($('.map-container')[0], {
+			center: new google.maps.LatLng(0,0),
+			zoom: 2,
+			mapTypeId: google.maps.MapTypeId.TERRAIN,
+			streetViewControl: false
+		});
+		addQuakeMarkers(quakes, gov.usgs.quakesMap);
+	});
+
+
+} //getQuakes()
+
+function addQuakeMarkers(quakes, map) {
+	var quake;
+	var idx;
+	var infoWindow;
+
+	for(idx = 0; idx < quakes.length; ++idx) {
+		quake = quakes[idx];
+		if(quake.location) {
+			quake.mapMarker = new google.maps.Marker({
+				map: map,
+				position: new google.maps.LatLng(quake.location.latitude, quake.location.longitude),
+
+			});
+		}
+		infoWindow = new google.maps.InfoWindow({
+			content: new Date(quake.datetime).toLocaleString() + ': magnitude ' + quake.magnitude + ' at depth of ' + quake.depth + ' meters'
+		});
+		registerInfoWindow(map, quake.mapMarker, infoWindow);
+
+	}
+}
+
+function registerInfoWindow(map, marker, infoWindow) {
+	google.maps.event.addListener(marker, 'click', function(){
+
+		infoWindow.open(map, marker);
+
+	});
+}
+
